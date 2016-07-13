@@ -7,10 +7,40 @@
 		<title>reveal.js</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+		<link rel="stylesheet" href="css/theme/beige.css">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+        <link rel="stylesheet" href="vendor/highlight.js/styles/gruvbox-dark.css">
+
+        
+        <style>
+            section {
+                padding: 0 !important;
+            }
+            pre code {
+                max-height: 100% !important;
+            }
+            img {
+                border: 0 !important;
+            }
+            .reveal .slides section .fragment.current-only {
+                opacity: 1;
+                visibility: visible;
+                display: none;
+            }
+            .reveal .slides section .fragment.current-only.current-fragment {
+                display: block;
+            }
+            .line {
+                display: block;
+            }
+            .line.focus {
+                background: #111;
+                font-weight: bold;
+            }
+        </style>
 
 		<!-- Printing and PDF exports -->
 		<script>
@@ -24,8 +54,426 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				
+
+                <section data-background="images/title-slide-background.png">
+                    <h2>Building Service Interfaces with OpenAPI / Swagger</h2>
+                    <p><small>Stephan Jaensch<br />sjaensch@yelp.com / @s_jaensch</small></p>
+                </section>
+				
+
+                <section data-background="images/slide-background.png">
+                    <h3>Yelp stats (Q1 2016)</h3>
+
+                    <img data-src="images/yelp_stats_q1_2016.png" style="box-shadow: none" />
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h3>What this talk is about</h3>
+
+                    <ul>
+                        <li>what is OpenAPI / Swagger</li>
+                        <li class="fragment">short introduction of some of the available libraries</li>
+                        <li class="fragment">the things the tutorials typically don’t talk about</li>
+                    </ul>
+
+                    <aside class="notes">
+                        <ul>
+                            <li class="fragment">what can go wrong</li>
+                            <li class="fragment">surprising issues when migrating from Swagger 1.2</li>
+                        </ul>
+                    </aside>
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h3>Why OpenAPI / Swagger</h3>
+
+                    <ul>
+                        <li>RESTful API specification and tooling</li>
+                        <li class="fragment">solves several problems when faced with building services</li>
+                    </ul>
+
+                    <aside class="notes">
+                        <ul>
+                            <li class="fragment">documentation</li>
+                            <li class="fragment">standardizing on a set of protocols</li>
+                            <li class="fragment">ensuring conformance to the spec</li>
+                        </ul>
+                    </aside>
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h3>Python support</h3>
+
+                    <ul>
+                        <li>bravado</li>
+                        <li class="fragment" style="color: grey">swaggerpy</li>
+                        <li class="fragment">pyramid_swagger</li>
+                        <li class="fragment">connexion</li>
+                        <li class="fragment" style="color: grey">django-rest-swagger</li>
+                    </ul>
+
+                    <aside class="notes">
+                        <ul>
+                            <li>In addition to doing service calls, bravado gives you a nice Python object stub as interface and does request and response validation
+                            </li>
+                        </ul>
+                    </aside>
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <pre><code class="yaml" data-trim>
+---
+  swagger: "2.0"
+  info:
+    version: "1.0.0"
+    title: "User service"
+  host: "user-service.com"
+  basePath: "/api"
+  schemes: 
+    - "http"
+  consumes: 
+    - "application/json"
+  produces: 
+    - "application/json"
+  paths:
+    /users:
+      get:
+        summary: List users by IDs
+        operationId: list_users
+        tags:
+          - user
+        parameters:
+          - name: "user_ids"
+            in: "query"
+            description: "IDs for which to return user objects"
+            required: true
+            type: "array"
+            items:
+              type: "integer"
+&nbsp;
+                    </code></pre>
+                    <p class="fragment" data-code-focus="2"></p>
+                    <p class="fragment" data-code-focus="3-5"></p>
+                    <p class="fragment" data-code-focus="6-13"></p>
+                    <p class="fragment" data-code-focus="14-16"></p>
+                    <p class="fragment" data-code-focus="17-20"></p>
+                    <p class="fragment" data-code-focus="21"></p>
+                    <p class="fragment" data-code-focus="22"></p>
+                    <p class="fragment" data-code-focus="23"></p>
+                    <p class="fragment" data-code-focus="25"></p>
+                    <p class="fragment" data-code-focus="26"></p>
+                    <p class="fragment" data-code-focus="27-28"></p>
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <pre><code class="yaml">
+        responses: 
+          "200":
+            description: "A list of users"
+            schema: 
+              type: "array"
+              items: 
+                $ref: "#/definitions/User"
+          default:
+            description: unexpected error
+            schema:
+              $ref: "#/definitions/Error"
+  definitions: 
+    User: 
+      type: "object"
+      required: 
+        - "id"
+        - "username"
+      properties: 
+        id: 
+          type: "integer"
+        username: 
+          type: "string"
+        business_id: 
+          type: "integer"
+                    </code></pre>
+                    <p class="fragment" data-code-focus="2"></p>
+                    <p class="fragment" data-code-focus="3"></p>
+                    <p class="fragment" data-code-focus="5-8"></p>
+                    <p class="fragment" data-code-focus="9-12"></p>
+                    <p class="fragment" data-code-focus="13"></p>
+                    <p class="fragment" data-code-focus="14-15"></p>
+                    <p class="fragment" data-code-focus="16-18"></p>
+                    <p class="fragment" data-code-focus="19"></p>
+                    <p class="fragment" data-code-focus="20-21"></p>
+                    <p class="fragment" data-code-focus="22-23"></p>
+                    <p class="fragment" data-code-focus="24-25"></p>
+
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <img data-src="images/swagger_editor.png" />
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <img data-src="images/swaggerui_bizapp.png" />
+
+                    <aside class="notes">
+                        <ul>
+                            <li>The name in brackets is the operationID, I'll talk more about it in a second</li>
+                            <li>You can see versioning in action, old versions are marked as deprecated</li>
+                        </ul>
+                    </aside>
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h3>Using bravado</h3>
+
+                    <pre><code class="python">
+from bravado.client import SwaggerClient
+from bravado.fido_client import FidoClient
+
+user_client = SwaggerClient.from_url(
+    'http://service_host:port/swagger.yaml',
+    http_client=FidoClient(),
+)
+
+user_future = client.user.list_users(user_ids=[1])
+business_future = client.business.list_bizs(business_ids=[1])
+
+user = user_future.result(timeout=DEFAULT_TIMEOUT)
+business = business_future.result(timeout=DEFAULT_TIMEOUT)
+                    </code></pre>
+
+                    <p class="fragment current-only" data-code-focus="5-8">Instantiating the client</p>
+                    <p class="fragment current-only" data-code-focus="10">Call to first service endpoint</p>
+                    <p class="fragment current-only" data-code-focus="11">Call to second service endpoint</p>
+                    <p class="fragment current-only" data-code-focus="13-14">Retrieving the results</p>
+
+                    <aside class="notes">
+                        swaggerpy also has an AsynchronousClient. Don't use it, it's buggy and will sometimes get stuck / time out
+                    </aside>
+
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h2>"War stories"</h2>
+                </section>
+                
+
+                <section data-background="images/slide-background.png">
+                    <h3>1. Dealing with network issues</h3>
+
+                    <pre><code class="python" data-trim>
+@retry(tries=3, exceptions=[fido.exceptions.HTTPTimeoutError])
+def retry_result(future):
+    return future.result(timeout=2)
+
+future = client.user.list_users(user_ids=[1])
+# redo the request in case of network failure… right?
+result = retry_result(future)
+                    </code></pre>
+
+                    <aside class="notes">
+                        <ul>
+                            <li>always set a timeout</li>
+                            <li>you can retry calls; however, make sure you do it right</li>
+                            <li>Retrying the call to result() only prolonges the timeout in the asynchronous case</li>
+                            <li>need to redo both, creating the future and calling result</li>
+                        </ul>
+                    </aside>
+
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h3>2. <code>null</code> values for optional fields</h3>
+
+                    <pre><code class="json" data-trim>
+{
+    "id": "1",
+    "username": "john",
+    "business_id": null
+}
+                    </code></pre>
+
+                    <pre class="fragment"><code class="python" data-trim>
+client = SwaggerClient.from_url(
+    'http://service_host:port/swagger.yaml',
+    config={'validate_responses': False},
+)
+                    </code></pre>
+
+                <aside class="notes">
+                    <ul>
+                        <li>bravado doesn't allow sending optional fields with null as value</li>
+                        <li>filter them out on the service side</li>
+                        <li>or disable response validation</li>
+                    </ul>
+                </aside>
+                    
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h3>3. Creating the client may kill performance</h3>
+
+                    <pre><code class="python" data-trim>
+import time
+from bravado.client import SwaggerClient
+
+time_start = time.time()
+client = SwaggerClient.from_url(
+    'http://169.254.255.254:20666/swagger.json',
+)
+print(round(time.time() - time_start, 2))
+
+&gt;&gt;&gt; 1.60
+                    </code></pre>
+
+                    <aside class="notes">
+                        <ul>
+                            <li>fetching and parsing the swagger spec can be costly</li>
+                            <li>swaggerpy used to cache the client, this isn't the case anymore</li>
+                            <li>cache the client yourself (this is left as an exercise to the audience)</li>
+                        </ul>
+                    </aside>
+
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <img data-src="images/memoized_client.png" />
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h2>4. Issues with deployment at scale</h2>
+
+                    <aside class="notes">
+                        <ul>
+                            <li>you have multiple instances of your service running</li>
+                            <li>you do a full uptime bounce strategy</li>
+                            <ul>
+                                <li>crossover</li>
+                                <li>bounce them individually</li>
+                            </ul>
+                            <li>how does this affect you as an application developer?</li>
+                        </ul>
+                        
+                    </aside>
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h3>4.1 Adding a non-optional field to the response</h3>
+
+                    <ol>
+                        <li class="fragment">Add it as optional to the spec, ship implementation</li>
+                        <li class="fragment">Change the spec to mark it as required</li>
+                    </ol>
+
+                    <img class="fragment" data-src="images/validation_errors.png" style="width: 80%" />
+                </section>
+                
+
+                <section data-background="images/slide-background.png">
+                    <h3>4.2 Removing a required field from the response</h3>
+
+                    <ol>
+                        <li class="fragment">Remove it from the spec</li>
+                        <li class="fragment">Ship implementation</li>
+                    </ol>
+
+                    <img class="fragment" data-src="images/postmortem_rollforward.png" style="width: 80%" />
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h3>4.3 Adding a reference to a new spec file</h3>
+
+                    <ol>
+                        <li class="fragment">Add the file</li>
+                        <li class="fragment">Add the reference to it</li>
+                    </ol>
+
+                    <p class="fragment">Or let <code>pyramid_swagger</code> combine the spec for you</p>
+
+                    <aside class="notes">
+                        <ul>
+                            <li>dereference_served_schema is new in pyramid_swagger 2.3.0rc3</li>
+                            <li>doesn't work with recursive references yet</li>
+                            <li>there's a pull request that attempts to fix this</li>
+                        </ul>
+                    </aside>
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h3>5. Changing the tag of an endpoint</h3>
+
+                    <pre class="fragment"><code class="python">
+future = client.user.list_users(user_ids=[1])
+#          tag --^      ^-- operationId
+                    </code></pre>
+
+                    <img class="fragment" data-src="images/postmortem_tagchange.png" style="width: 80%" />
+
+                    <aside class="notes">
+                        <ul>
+                            <li>Maybe you want to reorganize your endpoints, swaggerUI does group them by tag</li>
+                            <li>Saved this one for last because it's quite unexpected</li>
+                        </ul>
+                    </aside>
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h3>Conclusion</h3>
+
+                    <ol>
+                        <li class="fragment">When in doubt: version it</li>
+                        <li class="fragment">Deal with the network
+                            <ul>
+                                <li>"Graceful Degradation when Services Fail" by Daniel Riti @PyCon 2016</li>
+                            </ul>
+                        </li>
+                        <li class="fragment">Rolling forward and backward is not instantaneous</li>
+                        <li class="fragment">Be mindful of the differences between swaggerpy and bravado</li>
+                    </ol>
+
+                    <aside class="notes">
+                        <ul>
+                            <li>Spec changes can be more disruptive than it seems; when in doubt create a new endpoint version</li>
+                            <li>>Libraries don't take care of everything; you need to think about dealing with network issues</li>
+                            <li>Be mindful of the differences between swaggerpy and bravado</li>
+                        </ul>
+                    </aside>
+                
+                </section>
+
+                
+                <section data-background="images/slide-background.png">
+                    <h3>Other talks by Yelpers</h3>
+
+                    <p>"Asynchronous network requests in a web application"<br />by Lauris Jullien; Thursday, 10:30, A1</p>
+                    <p>watch the video for "Protect your users with circuit breakers"<br />by Scott Triglia; Tuesday, 14:00, A2</p>
+                </section>
+
+
+                <section data-background="images/check_out_yelp.png">
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <h2>Questions?</h2>
+                </section>
+
 			</div>
 		</div>
 
@@ -36,13 +484,17 @@
 			// More info https://github.com/hakimel/reveal.js#configuration
 			Reveal.initialize({
 				history: true,
+                center: true,
+                controls: false,
 
 				// More info https://github.com/hakimel/reveal.js#dependencies
+				// { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
 				dependencies: [
 					{ src: 'plugin/markdown/marked.js' },
 					{ src: 'plugin/markdown/markdown.js' },
 					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+                    { src: 'vendor/highlight.js/highlight.pack.js' },
+                    { src: 'node_modules/reveal-code-focus/reveal-code-focus.js', callback: function() { RevealCodeFocus(); } }
 				]
 			});
 		</script>

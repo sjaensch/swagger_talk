@@ -25,6 +25,7 @@
     "express": "~4.13.3",
     "grunt-cli": "~0.1.13",
     "mustache": "~2.2.1",
+    "reveal-code-focus": "^0.2.0",
     "socket.io": "~1.3.7"
   },
   "devDependencies": {
