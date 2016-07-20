@@ -57,7 +57,7 @@
 				
 
                 <section data-background="images/title-slide-background.png">
-                    <h2>Building Service Interfaces with OpenAPI / Swagger</h2>
+                    <h2>Building Service Interfaces with<br />OpenAPI / Swagger</h2>
                     <p><small>Stephan Jaensch<br />sjaensch@yelp.com / @s_jaensch</small></p>
                 </section>
 				
@@ -66,6 +66,11 @@
                     <h3>Yelp stats (Q1 2016)</h3>
 
                     <img data-src="images/yelp_stats_q1_2016.png" style="box-shadow: none" />
+
+                    <aside class="notes">
+                        <p>connect people with great local businesses</p>
+                        <p>emphasis on "great", over 100M reviews by our users</p>
+                    </aside>
                 </section>
 
 
@@ -73,15 +78,15 @@
                     <h3>What this talk is about</h3>
 
                     <ul>
-                        <li>what is OpenAPI / Swagger</li>
-                        <li class="fragment">short introduction of some of the available libraries</li>
-                        <li class="fragment">the things the tutorials typically don’t talk about</li>
+                        <li>What is OpenAPI / Swagger</li>
+                        <li class="fragment">Short introduction of some of the available libraries</li>
+                        <li class="fragment">The things the tutorials typically don’t talk about</li>
                     </ul>
 
                     <aside class="notes">
                         <ul>
-                            <li class="fragment">what can go wrong</li>
-                            <li class="fragment">surprising issues when migrating from Swagger 1.2</li>
+                            <li>What can go wrong</li>
+                            <li>Surprising issues when migrating from Swagger 1.2</li>
                         </ul>
                     </aside>
                 </section>
@@ -92,14 +97,17 @@
 
                     <ul>
                         <li>RESTful API specification and tooling</li>
-                        <li class="fragment">solves several problems when faced with building services</li>
+                        <li class="fragment">Solves several problems when faced with building services</li>
                     </ul>
 
                     <aside class="notes">
                         <ul>
-                            <li class="fragment">documentation</li>
-                            <li class="fragment">standardizing on a set of protocols</li>
-                            <li class="fragment">ensuring conformance to the spec</li>
+                            <li>specifies the contract of your service</li>
+                            <li>human and machine friendly</li>
+                            <li>automatic documentation</li>
+                            <li>ensuring conformance to the spec</li>
+                            <li>Current version is 2.0, released 2015. Going to mention the old version, ignore if you're not migrating.</li>
+                            <li>Community-driven set of tools, language-agnostic, ever evolving</li>
                         </ul>
                     </aside>
                 </section>
@@ -120,6 +128,7 @@
                         <ul>
                             <li>In addition to doing service calls, bravado gives you a nice Python object stub as interface and does request and response validation
                             </li>
+                            <li>Python 3 ready</li>
                         </ul>
                     </aside>
                 </section>
@@ -168,6 +177,10 @@
                     <p class="fragment" data-code-focus="25"></p>
                     <p class="fragment" data-code-focus="26"></p>
                     <p class="fragment" data-code-focus="27-28"></p>
+
+                    <aside class="notes">
+                        This is a YAML file, specs can also be written as JSON
+                    </aside>
                 </section>
 
 
@@ -215,16 +228,21 @@
 
                 <section data-background="images/slide-background.png">
                     <img data-src="images/swagger_editor.png" />
+                    
+                    <p>editor.swagger.io</p>
                 </section>
 
 
                 <section data-background="images/slide-background.png">
                     <img data-src="images/swaggerui_bizapp.png" />
+                    
+                    <p>swagger.io/swagger-ui/</p>
 
                     <aside class="notes">
                         <ul>
                             <li>The name in brackets is the operationID, I'll talk more about it in a second</li>
                             <li>You can see versioning in action, old versions are marked as deprecated</li>
+                            <li>No built-in versioning support; versions required for backwards-incompatible changes</li>
                         </ul>
                     </aside>
                 </section>
@@ -258,6 +276,12 @@ business = business_future.result(timeout=DEFAULT_TIMEOUT)
                         swaggerpy also has an AsynchronousClient. Don't use it, it's buggy and will sometimes get stuck / time out
                     </aside>
 
+                </section>
+
+
+                <section data-background="images/slide-background.png">
+                    <img data-src="images/zipkin_serial.png" />
+                    <img class="fragment" data-src="images/zipkin_parallel.png" />
                 </section>
 
 
@@ -296,7 +320,7 @@ result = retry_result(future)
 
                     <pre><code class="json" data-trim>
 {
-    "id": "1",
+    "id": 1,
     "username": "john",
     "business_id": null
 }
@@ -389,8 +413,13 @@ print(round(time.time() - time_start, 2))
                         <li class="fragment">Remove it from the spec</li>
                         <li class="fragment">Ship implementation</li>
                     </ol>
+                    <p class="fragment">(Don't do that)</p>
+                </section>
 
-                    <img class="fragment" data-src="images/postmortem_rollforward.png" style="width: 80%" />
+
+                <section data-background="images/slide-background.png">
+                    <h3>4.2 Removing a required field from the response</h3>
+                    <img data-src="images/postmortem_rollforward.png" style="width: 90%" />
                 </section>
 
 
@@ -419,10 +448,10 @@ print(round(time.time() - time_start, 2))
 
                     <pre class="fragment"><code class="python">
 future = client.user.list_users(user_ids=[1])
-#          tag --^      ^-- operationId
+           tag --^      ^-- operationId
                     </code></pre>
 
-                    <img class="fragment" data-src="images/postmortem_tagchange.png" style="width: 80%" />
+                    <img class="fragment" data-src="images/postmortem_tagchange.png" style="width: 90%" />
 
                     <aside class="notes">
                         <ul>
@@ -445,13 +474,14 @@ future = client.user.list_users(user_ids=[1])
                         </li>
                         <li class="fragment">Rolling forward and backward is not instantaneous</li>
                         <li class="fragment">Be mindful of the differences between swaggerpy and bravado</li>
+                        <li class="fragment">Don't do services if you don't have to</li>
                     </ol>
 
                     <aside class="notes">
                         <ul>
                             <li>Spec changes can be more disruptive than it seems; when in doubt create a new endpoint version</li>
-                            <li>>Libraries don't take care of everything; you need to think about dealing with network issues</li>
-                            <li>Be mindful of the differences between swaggerpy and bravado</li>
+                            <li>Libraries don't take care of everything; you need to think about dealing with network issues</li>
+                            <li>Martin Fowler; services only to scale development</li>
                         </ul>
                     </aside>
                 
@@ -462,16 +492,27 @@ future = client.user.list_users(user_ids=[1])
                     <h3>Other talks by Yelpers</h3>
 
                     <p>"Asynchronous network requests in a web application"<br />by Lauris Jullien; Thursday, 10:30, A1</p>
-                    <p>watch the video for "Protect your users with circuit breakers"<br />by Scott Triglia; Tuesday, 14:00, A2</p>
+                    <p>Watch the video for "Protect your users with circuit breakers"<br />by Scott Triglia; Tuesday, 14:00, A2</p>
+
+                    <aside class="notes">
+                        <p>circuit breakers only necessary when communicating over the network</p>
+                    </aside>
                 </section>
 
 
                 <section data-background="images/check_out_yelp.png">
+
+                    <aside class="notes">
+                        <p>Find us at our booth, we have a raffle going on, the winner gets a drone!</p>
+                    </aside>
                 </section>
 
 
                 <section data-background="images/slide-background.png">
                     <h2>Questions?</h2>
+
+                    <p>&nbsp;</p>
+                    <p>sjaensch@yelp.com / @s_jaensch</p>
                 </section>
 
 			</div>
